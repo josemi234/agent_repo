@@ -1,0 +1,180 @@
+{   "VERSION": "Version final de formato plc, ejemplo",
+    "id": "CM0000000012345678",
+    "name": "test",
+    "database": {
+      "database_name": "GG_reads",
+      "recents_table": {
+        "name": "Recents",
+        "max_rows": 500000
+      },
+      "history_table": {
+        "name": "History",
+        "max_rows": 5000
+      },
+      "time_period": 300
+    },
+    "lambda_functions": {
+        "GG_plc_controller": {
+            "fx_status": 1,
+            "resource": "/dev/ttyAMA2",
+            "schedule": {
+                "context": "mins",
+                "every": 1
+                },
+            "handle_local_echo": false,
+            "device_types":{
+              "plc_phases":{
+                "registers":{
+                  "Va_1":{
+                    "address": 4096,
+                    "count": 1,
+                    "value_format": "8uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  },
+                  "Vc_1":{
+                    "address": 4098,
+                    "count": 1,
+                    "value_format": "8uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  },
+                  "PT": {
+                    "address": 8198,
+                    "count": 1,
+                    "value_format": "16uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "read_function": "read_from_holding_registers",
+                    "write_function": "write_from_register"
+                  },
+                  "PT_real": {
+                    "address": 8198,
+                    "count": 1,
+                    "value_format": "16uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  }
+                }
+              },
+              "siemens_PAC3220":{
+                "registers":{
+                  "V_L1":{
+                    "address": 1,
+                    "count": 2,
+                    "value_format": "32float",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor":1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  },
+                  "V_L2":{
+                    "address": 3,
+                    "count": 2,
+                    "value_format": "32float",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  },
+                  "I_L1": {
+                    "address": 13,
+                    "count": 2,
+                    "value_format": "32float",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1 , 
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                                  },
+                  "I_L2": {
+                    "address": 15,
+                    "count": 2,
+                    "value_format": "32float",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  },
+                  "contraste": {
+                    "address": 50055,
+                    "count": 2,
+                    "value_format": "32uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_from_holding_registers",
+                    "write_function": "write_from_registers"
+                  },
+                  "contraste_real": {
+                    "address": 50055,
+                    "count": 2,
+                    "value_format": "32uint",
+                    "byteorder_key": "bigendian",
+                    "wordorder_key": "bigendian",
+                    "factor": 1,
+                    "read_function": "read_holding_registers",
+                    "write_function": "write_registers"
+                  }
+                }
+              }
+              
+            },
+            "devices":{
+              "plc_phases":{
+                "id": "plc_conexion_RTU_ejemplo",
+                "protocol": "RTU",
+                "device_type": "plc_phases",
+                "timeout": 0.2,
+                "unit": 1,
+                "baudrate": 9600,
+                "stopbits": 1,
+                "bytesize": 8,
+                "parity" : "N"
+              },
+              "plc_siemens":{
+                "id": "plc_conexion_TCP_ejemplo",
+                "protocol": "TCP",
+                "device_type": "siemens_PAC3220",
+                "ip": "192.168.1.10",
+                "port": 502,
+                "timeout": 0.5,
+                "unit": 1
+              }
+            },
+            "variables": {
+                "Va_1": {"master": "plc_phases", "register": "Vc_1" },
+                "Vc_1": {"master": "plc_phases", "register": "Va_1" },
+                "PT_bit": {"master": "plc_phases", "register": "PT", "bit":15 },
+                "V_L1_TCP": {"master": "plc_siemens", "register": "V_L1"},
+                "V_L2_TCP": {"master": "plc_siemens", "register": "V_L2"},
+                "contrast": {"master": "plc_siemens", "register": "contraste", "bit":30}
+            },
+            "control_laws": {
+                  "bomba1": {"id": "bomba_1" ,
+                            "automode": 1,
+                            "manual_actions": "contrast=0, PT_bit=1",
+                            "automatic_actions": [
+                              {"condition": "Va_1>0 and Vc_1>230", "action": "contrast=1"},
+                              {"condition": "other_case", "action": "PT_bit=0, contrast=0"}
+                              ],
+                            "check_variables":{
+                            "valor_real_PT": {"master": "plc_phases", "register": "PT_real" },
+                            "contraste_real": {"master": "plc_siemens", "register": "contraste_real" }
+                          }
+                        }
+                    }
+        }
+    }
+}
